@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from math import floor
-from time import time
 class sudoku_solver:
     def __init__(self):
         pass
