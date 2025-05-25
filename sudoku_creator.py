@@ -133,7 +133,7 @@ class sudoku_creator(sudoku_solver):
                 puzzle = self.create_solved_puzzle()
         except ValueError:
             pass
-        #same issue with mutations here
+
         flat = puzzle.reshape((81,1))
         filled = []
         for i, item in enumerate(flat):
