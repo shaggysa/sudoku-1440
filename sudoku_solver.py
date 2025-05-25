@@ -259,11 +259,11 @@ class sudoku_solver:
             return False
         
 solver = sudoku_solver()
-#print(solver.solve(solver.read_puzzle('puzzles.csv', 1001)))
+
 #you can change the 1002 to any number you would like in order to solve a different problem
-#last = time()
-#solver.solve_and_check(102,'puzzles.csv')
-#print(time()-last)
+
+#solver.solve_and_check(1002,'puzzles.csv')
+
 
 
 
