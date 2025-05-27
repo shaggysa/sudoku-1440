@@ -11,6 +11,7 @@ except ImportError:
 from math import floor
 from time import time
 import statistics
+
 class sudoku_solver:
     def __init__(self):
         pass
@@ -51,7 +52,7 @@ class sudoku_solver:
                 return False
         
         #check for repeats within squares
-        for i in range(0, 54, 27):
+        for i in range(0, 55, 27):
             for j in range(i, i+9, 3):
                 indices = [j, j+1, j+2, j+9, j+10, j+11, j+18, j+19, j+20]
                 if not self._no_repeats(row_major[indices]):
