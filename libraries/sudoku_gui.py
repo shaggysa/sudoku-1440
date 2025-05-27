@@ -14,14 +14,13 @@ class sudoku_gui:
         self.mode = 'submit_unsolved'
         self.main = tk.Tk()
         self.scale = self.main.winfo_screenheight() / 1440
-        self.button_font = ('Hellvetica',round(10*self.scale))
         self.main.title('Sudoku')
         self.c1 = Canvas(self.main, height=round(1400*self.scale), width=round(2560*self.scale), bg='white')
-        self.submit_button = Button(self.c1, text="Submit!", anchor="center", height = round(2*self.scale), width = round(15*self.scale), bg = "white", command=self.submit)
-        self.read_puzzle_input = Button(self.c1, text="input your own puzzle", height=round(2*self.scale), width = round(22*self.scale), bg='white', command=self.input_puzzle, font=self.button_font)
-        self.read_random_button = Button(self.c1, text="read a random puzzle from file", anchor="center", height = round(2*self.scale), width = round(22*self.scale), bg = "white", command=self.read_random_puzzle,font=self.button_font)
-        self.gen_random_button = Button(self.c1, text="generate a random puzzle", anchor="center", height = round(2*self.scale), width = round(22*self.scale), bg = "white", command=self.generate_puzzle,font=self.button_font)
-        self.computer_solve_button = Button(self.c1, text="Solve With Computer", anchor="center", height = round(2*self.scale), width = round(15*self.scale), bg = "white", command=self.computer_solve, font=self.button_font)
+        self.submit_button = Button(self.c1, text="Submit!", anchor="center", height = 2, width = 15, bg = "white", command=self.submit)
+        self.read_puzzle_input = Button(self.c1, text="input your own puzzle", height=2, width = 22, bg='white', command=self.input_puzzle)
+        self.read_random_button = Button(self.c1, text="read a random puzzle from file", anchor="center", height = 2, width = 22, bg = "white", command=self.read_random_puzzle)
+        self.gen_random_button = Button(self.c1, text="generate a random puzzle", anchor="center", height = 2, width = 22, bg = "white", command=self.generate_puzzle)
+        self.computer_solve_button = Button(self.c1, text="Solve With Computer", anchor="center", height = 2, width = 15, bg = "white", command=self.computer_solve)
         self.timer = tk.Label(self.c1, text="0:00", font=('Hellvetica', round(12*self.scale)), bg='white')
         self.validate = self.main.register(self.on_validate), '%P'
         self.stopwatch_running = False
@@ -56,7 +55,7 @@ class sudoku_gui:
                 
    
     def message(self, msg):
-        message = self.c1.create_text(1270*self.scale, 1170*self.scale, text=msg, anchor=CENTER, font=("Arial", 24*self.scale), fill='red')
+        message = self.c1.create_text(1270*self.scale, 1170*self.scale, text=msg, anchor=CENTER, font=("Arial", 24), fill='red')
         self.c1.after(2000, lambda: self.c1.delete(message))
                 
 
