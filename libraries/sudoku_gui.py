@@ -140,7 +140,9 @@ class sudoku_gui:
                     else:
                         p[i] = x
                 try:
-                    if not sudoku_creator().single_solution(p.reshape(9,9)):
+                    if not sudoku_solver().is_valid(p.reshape((9,9))):
+                        self.message('The puzzle you have submitted is unsolvable!')
+                    elif not sudoku_creator().single_solution(p.reshape(9,9)):
                         self.message('The puzzle you have submitted has multiple solutions! Please re-check it!')
                     else:
                         self.current_puzzle = p.reshape((9,9))
