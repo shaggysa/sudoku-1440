@@ -2,7 +2,7 @@
 
 This is an interactive sudoku creating/solving GUI in 1440p created in python with Tkinter.
 
-Resolution scaling has been implemented, but it is untested and almost certainly broken.
+Resolution scaling has been implemented, but it is a work in progress.
 
 It can solve puzzles you input and create its own puzzles for you to solve.
 
