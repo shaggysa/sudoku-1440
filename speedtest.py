@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
 from libraries.sudoku_solver import sudoku_solver
-
+import os
+import sys
+os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
     
 sudoku_solver().speedtest('libraries/puzzles.csv', 2, 1001)
 
