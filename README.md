@@ -12,7 +12,9 @@ Numpy: Puzzles are internally represented as numpy arrays.
 
 Pandas: Reuqired in order to read from the "puzzles.csv file."
 
+Tk: GUI is coded with Tk.
+
 ## usage
 
-Once you have installed the dependancies and downloaded the source code, simply run "python3 main.py" in a terminal within the project's folder and the gui will pop up. You can also run speedtest.py to test the speed of the solver.
+Once you have installed the dependancies with pip and downloaded the source code, simply run "python3 main.py" in a terminal within the project's folder and the gui will pop up. You can also run speedtest.py to test the speed of the solver.
 
