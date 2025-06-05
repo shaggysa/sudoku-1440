@@ -9,7 +9,7 @@ from random import randint
 
 class sudoku_gui:
     def __init__(self):
-        self.current_puzzle = sudoku_creator().blank_puzzle()
+        self.current_puzzle = sudoku_creator.blank_puzzle()
         self.inputs = {}
         self.mode = 'submit_unsolved'
         self.main = tk.Tk()
@@ -116,15 +116,13 @@ class sudoku_gui:
                 nope = False
                 for i in self.inputs:
                     x = self.inputs[i].get()
-                    print(x)
                     if x == '':
                         self.message('Please fill the entire grid!')
                         nope = True
                         break
                     else:
                         p[i] = x
-                        print(x)
-                if not nope and sudoku_solver().is_valid(p.reshape((9,9))):
+                if not nope and sudoku_solver.is_valid(p.reshape((9,9))):
                     self.current_puzzle = p.reshape((9,9))
                     self.populate_grid(True)
                     self.buttons()
@@ -140,9 +138,9 @@ class sudoku_gui:
                     else:
                         p[i] = x
                 try:
-                    if not sudoku_solver().is_valid(p.reshape((9,9))):
+                    if not sudoku_solver.is_valid(p.reshape((9,9))):
                         self.message('The puzzle you have submitted is unsolvable!')
-                    elif not sudoku_creator().single_solution(p.reshape(9,9)):
+                    elif not sudoku_creator.single_solution(p.reshape(9,9)):
                         self.message('The puzzle you have submitted has multiple solutions! Please re-check it!')
                     else:
                         self.current_puzzle = p.reshape((9,9))
@@ -158,7 +156,7 @@ class sudoku_gui:
 
     def computer_solve(self):
         if self.pc_solve_confirm:
-            self.current_puzzle = sudoku_solver().solve(self.current_puzzle)
+            self.current_puzzle = sudoku_solver.solve(self.current_puzzle)
             self.populate_grid()
             self.stopwatch_running = False
             self.timer_id = self.c1.create_window(1750*self.scale, 190*self.scale, window=self.timer)
@@ -176,19 +174,19 @@ class sudoku_gui:
     
     def generate_puzzle(self):
         self.mode = 'submit_solved'
-        self.current_puzzle = sudoku_creator().create_unsolved()
+        self.current_puzzle = sudoku_creator.create_unsolved()
         self.populate_grid()
         self.buttons_all()
         
     def read_random_puzzle(self):
         self.mode = 'submit_solved'
-        self.current_puzzle = sudoku_solver().read_puzzle('libraries/puzzles.csv', randint(2,1000))
+        self.current_puzzle = sudoku_solver.read_puzzle('libraries/puzzles.csv', randint(2,1000))
         self.populate_grid()
         self.buttons_all()
         
     def input_puzzle(self):
         self.mode = 'submit_unsolved'
-        self.current_puzzle = sudoku_creator().blank_puzzle()
+        self.current_puzzle = sudoku_creator.blank_puzzle()
         self.populate_grid()
         self.buttons()
 
