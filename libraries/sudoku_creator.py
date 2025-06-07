@@ -166,6 +166,7 @@ class sudoku_creator(sudoku_solver):
                     return __class__.create_unsolved(puzzle, min_hints)
                 else:
                     flat[z] = y
+                    filled.remove(z)
                     if fails > 10:
                         return puzzle
                     return __class__.create_unsolved(puzzle, min_hints, fails+1)
