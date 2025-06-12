@@ -260,7 +260,7 @@ class sudoku_solver:
             return False
     
     @staticmethod
-    def solve_and_check(puzzle_line_num:int, file:str) -> None:
+    def solve_and_check(puzzle_line_num:int, file:str) -> float:
         """_Prints the unsolved puzzle, the solved puzzle, and if the solved puzzle matches the answer key in the csv file if it is in the format "puzzle, solution"._
 
         Args:
@@ -269,15 +269,17 @@ class sudoku_solver:
         """
         unsolved = __class__.read_puzzle(file, puzzle_line_num)
         print(f"Unsolved:\n{unsolved.astype(int)}")
+        start_time = time()
         solved = __class__.solve(unsolved)
+        elapsed = time() - start_time
         print(f'Solved:\n{solved.astype(int)}')
         ans = pd.read_csv(file).to_numpy()
         if __class__.check_ans(solved, ans[puzzle_line_num-2][1]):
             print('Solved puzzle matches answer key!')
-            return True
+            return elapsed
         else:
-            print('Solved puzzle does not match answer key...\nΣ(-᷅_-᷄๑)')
-            return False
+            raise ValueError('Solved puzzle does not match answer key...\nΣ(-᷅_-᷄๑)')
+            
         
     @staticmethod    
     def speedtest(file:str, first_line:int, last_line:int) :
@@ -291,17 +293,13 @@ class sudoku_solver:
         times = []
         for i in range(first_line,last_line+1):
             print("Puzzle:", i)
-            last = time()
-            if __class__.solve_and_check(i, file) == False:
-                print("Test failed!")
-                return None
-            times.append(time()-last)
-        print("Test Suceeded!")
-        print("Mean:",statistics.mean(times))
-        print("Median:",statistics.median(times))
-        print("Minimum:",min(times))
-        print("Maximum:", max(times))
-        print("Total:",sum(times))
+            times.append(__class__.solve_and_check(i, file))
+        print("\nTest Suceeded! Here are the stats!")
+        print(f"Mean: {statistics.mean(times)*1000} ms")
+        print(f"Median: {statistics.median(times)*1000} ms")
+        print(f"Minimum: {min(times)*1000} ms")
+        print(f"Maximum: {max(times)*1000} ms")
+        print(f"Total: {sum(times)*1000} ms")
 
 
 
