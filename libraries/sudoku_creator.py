@@ -158,7 +158,10 @@ class sudoku_creator(sudoku_solver):
                 filled.append(i)
         try:
             if min_hints < len(filled):
-                z = choice(filled)
+                try:
+                    z = choice(filled)
+                except IndexError:
+                    return puzzle
                 y = copy(flat[z])
                 flat[z] = 0
                 puzzle = flat.reshape((9,9))
