@@ -16,7 +16,7 @@ kivy: Used for the GUI.
 
 Once you have installed the dependancies, simply run main.py with python and the gui will pop up. You can run speedtest.py to test the speed of the solver.
 
-As of release 2.0, executables are released with the code. Linux, MacOS, and Windows are all supported in the x64 architecture.
+As of [release 2.0](https://github.com/shaggysa/sudoku-1440/releases/tag/V2.0), executables are released with the code. Linux, MacOS, and Windows are all supported in the x64 architecture.
 Simply download the correct execuatable and run it!
 
 If your architecture is not supported, you can build the packages yourself by running pyinstaller with the included .spec files. 
