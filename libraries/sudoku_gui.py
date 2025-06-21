@@ -1,193 +1,327 @@
-from libraries.sudoku_solver import sudoku_solver
-from libraries.sudoku_creator import sudoku_creator
-import tkinter as tk
-from tkinter import *
-from time import time as t
-import numpy as np
-from math import floor
+try:
+    from kivy.uix.gridlayout import GridLayout
+    from kivy.uix.floatlayout import FloatLayout
+    from kivy.uix.textinput import TextInput
+    from kivy.uix.button import Button
+    from kivy.uix.label import Label
+    from kivy.app import App
+    from kivy.uix.boxlayout import BoxLayout
+    from kivy.core.window import Window
+    from kivy.metrics import sp
+    from kivy.graphics import Color, Line, Rectangle
+    from kivy.clock import Clock
+except ImportError:
+    print("Kivy is a necessary dependancy. Please install it with pip to use the app.")
+    
+from libraries.puzzle_reader import PuzzleReader
+from libraries.sudoku_solver import SudokuSolver
+from libraries.sudoku_creator import SudokuCreator
+from copy import copy
+from sys import setrecursionlimit
 from random import randint
 
-class sudoku_gui:
-    def __init__(self):
-        self.current_puzzle = sudoku_creator.blank_puzzle()
-        self.inputs = {}
-        self.mode = 'submit_unsolved'
-        self.main = tk.Tk()
-        self.scale = self.main.winfo_screenheight() / 1440
-        self.main.title('Sudoku')
-        self.c1 = Canvas(self.main, height=round(1400*self.scale), width=round(2560*self.scale), bg='white')
-        self.submit_button = Button(self.c1, text="Submit!", anchor="center", height = 2, width = 15, bg = "white", command=self.submit)
-        self.read_puzzle_input = Button(self.c1, text="input your own puzzle", height=2, width = 22, bg='white', command=self.input_puzzle)
-        self.read_random_button = Button(self.c1, text="read a random puzzle from file", anchor="center", height = 2, width = 22, bg = "white", command=self.read_random_puzzle)
-        self.gen_random_button = Button(self.c1, text="generate a random puzzle", anchor="center", height = 2, width = 22, bg = "white", command=self.generate_puzzle)
-        self.computer_solve_button = Button(self.c1, text="Solve With Computer", anchor="center", height = 2, width = 15, bg = "white", command=self.computer_solve)
-        self.timer = tk.Label(self.c1, text="0:00", font=('Hellvetica', round(12*self.scale)), bg='white')
-        self.validate = self.main.register(self.on_validate), '%P'
-        self.stopwatch_running = False
-        self.stopwatch_start_time = t()
-        self.pc_solve_confirm = False
-        self.input_puzzle()
-        self.main.mainloop()
+setrecursionlimit(1000000)
+Window.maximize()
+Window.clearcolor = (1,1,1,1)
 
-    def start_stopwatch(self):
-        self.stopwatch_running = True
-        self.stopwatch_start_time = t()
-        self.update_stopwatch()
+class Message(FloatLayout):
+    def __init__(self, message:str, **kwargs):
+        super().__init__(**kwargs)
+        self.size_hint = (0.6, 0.06)
 
-    def update_stopwatch(self):
-        if self.stopwatch_running:
-            total_seconds = round(t()-self.stopwatch_start_time)
-            seconds_display = total_seconds % 60
-            if len(str(seconds_display)) == 1:
-                seconds_display = '0' + str(seconds_display)
-            time = f'{floor(total_seconds/60)}:{seconds_display}'
-            self.timer.config(text=time)
-            self.timer.after(1000, self.update_stopwatch)
+        with self.canvas.before:
+            Color(0.2, 0.7, 0.3, 1)
+            self.rect = Rectangle()
+
+        self.bind(pos=self.update_rect, size=self.update_rect)
+        
+        self.label = Label(text=message, halign="center", valign="middle", color = (1,1,1,1))
+        self.add_widget(self.label)
     
-    def on_validate(self, new_text:str) -> bool:
-        match len(new_text):
-            case 0:
-                return True
-            case 1:
-                return True if new_text.isnumeric() and new_text != '0' else False
-            case _:
-                return False
-                
-   
-    def message(self, msg):
-        message = self.c1.create_text(1270*self.scale, 1170*self.scale, text=msg, anchor=CENTER, font=("Arial", 24), fill='red')
-        self.c1.after(2000, lambda: self.c1.delete(message))
-                
-
-    def create_grid(self) -> None:
-        self.c1.delete('all')
-        for i in range(1,11):
-            if i in (1,4,7,10):
-                t = 5
-            else:
-                t = 1
-            
-            x = ((i*100) + 718)*self.scale
-            y = ((i*100) + 128)*self.scale
-            self.c1.create_line(x, 228*self.scale, x, 1128*self.scale, width=t)
-            self.c1.create_line(818*self.scale, y, 1718*self.scale, y, width=t)
-        self.c1.pack()
-        self.main.update()
-
-    def populate_grid(self, timer = False):
-        self.inputs.clear()
-        self.create_grid()
-        if timer:
-            self.timer_id = self.c1.create_window(1750*self.scale, 190*self.scale, window=self.timer)
-        flat = self.current_puzzle.reshape((81,1))
-        for i, item in enumerate(flat):
-            x = ((i%9)*100 + 868) * self.scale
-            y = (floor(i/9)*100 + 278) * self.scale
-            if item == 0:
-                entry = tk.Entry(self.c1, bg='white', bd = 1, highlightthickness=0, font=("Arial", round(40*self.scale)), width=round(2*self.scale), validate = 'key', validatecommand=self.validate, justify=CENTER)
-                self.c1.create_window(x, y, window=entry)
-                self.inputs.update({i:entry})
-            else:
-                self.c1.create_text(x, y, text=int(item[0]), anchor=CENTER, font=("Arial", round(40*self.scale)))
-
-    def buttons(self):
-        self.c1.create_window(1197*self.scale, 1200*self.scale, window=self.submit_button, anchor=NW)
-        self.c1.create_window(868*self.scale, 150*self.scale, window=self.read_random_button, anchor=NW)
-        self.c1.create_window(1168*self.scale, 150*self.scale, window=self.read_puzzle_input, anchor=NW)
-        self.c1.create_window(1468*self.scale, 150*self.scale, window=self.gen_random_button, anchor=NW)
+    def update_rect(self, *args):
+        pos_x, pos_y = self.pos
+        self.rect.pos = (pos_x*1.26, pos_y * 0.958)
+        self.label.pos = (pos_x * 0.623, pos_y * 0.94)
+        x, y = self.size 
+        self.rect.size = (x*0.32, y*0.6)
+        self.label.size = (x*0.65, y*0.7)
+        self.label.font_size = self.height*0.4
         
 
-    def buttons_all(self):
-        self.c1.create_window(1097*self.scale, 1200*self.scale, window=self.submit_button, anchor=NW)
-        self.c1.create_window(868*self.scale, 150*self.scale, window=self.read_random_button, anchor=NW)
-        self.c1.create_window(1168*self.scale, 150*self.scale, window=self.read_puzzle_input, anchor=NW)
-        self.c1.create_window(1468*self.scale, 150*self.scale, window=self.gen_random_button, anchor=NW)
-        self.c1.create_window(1297*self.scale, 1200*self.scale, window=self.computer_solve_button, anchor=NW)
-        self.timer_id = self.c1.create_window(1750*self.scale, 190*self.scale, window=self.timer)
-        self.start_stopwatch()
+class ResizingLabel(Label):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.bind(size=self.update_font_size)
+    
+    def update_font_size(self, *args):
+        self.font_size = self.height * 0.67
+
+class OneDigitInput(TextInput):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.multiline = False
+
+    def insert_text(self, substring, from_undo=False):
+        if len(self.text) >= 1 and not from_undo:
+            self.text = ''
+        if substring.isdigit():
+            return super().insert_text(substring, from_undo)
+        return
+
+    def on_text_change(self, instance, value:int):
+        if len(value) > 1:
+            self.text = value[-1]
+    def update_border():
+        pass
+
+
+class GridCell(FloatLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.bind(size = self.update_font_size)
+        self.setup_cell()
+        self.is_markdown_mode = False
+    
+    def setup_cell(self):
         
+        self.main_input = OneDigitInput(multiline=False, size_hint=(1.2, 1.2), pos_hint={'center_x': 0.5, 'center_y': 0.325}, background_color = (0,0,0,0), halign = 'center', padding = [0,0,0,0], border = (0,0,0,0))
+
+        self.markdown_input = TextInput(multiline=True, size_hint=(.95, .95), pos_hint={'center_x': 0.5, 'center_y': 0.5}, disabled = True, halign = 'right', background_color = (0,0,0,0), padding = [0,0,0,0], border = (0,0,0,0))
         
+        self.add_widget(self.markdown_input)    
+        self.add_widget(self.main_input)
+        
+    def update_text_size(self, instance, size):
+        instance.text_size = size    
+    
+    def update_font_size(self, *args):
+        cell_height = self.height
+        self.main_input.font_size = cell_height * 0.69
+        self.markdown_input.font_size = cell_height * .24
 
-    def submit(self):
-        p = self.current_puzzle.copy()
-        p = p.reshape((81,1))
-        match self.mode:
-            case 'submit_solved':
-                nope = False
-                for i in self.inputs:
-                    x = self.inputs[i].get()
-                    if x == '':
-                        self.message('Please fill the entire grid!')
-                        nope = True
-                        break
-                    else:
-                        p[i] = x
-                if not nope and sudoku_solver.is_valid(p.reshape((9,9))):
-                    self.current_puzzle = p.reshape((9,9))
-                    self.populate_grid(True)
-                    self.buttons()
-                    self.message('Correct!')
-                    self.stopwatch_running = False
-                elif not nope:
-                    self.message('Incorrect!')     
-            case 'submit_unsolved':
-                for i in self.inputs:
-                    x = self.inputs[i].get()
-                    if x == '':
-                        p[i] = 0  
-                    else:
-                        p[i] = x
-                try:
-                    if not sudoku_solver.is_valid(p.reshape((9,9))):
-                        self.message('The puzzle you have submitted is unsolvable!')
-                    elif not sudoku_creator.single_solution(p.reshape(9,9)):
-                        self.message('The puzzle you have submitted has multiple solutions! Please re-check it!')
-                    else:
-                        self.current_puzzle = p.reshape((9,9))
-                        self.populate_grid()
-                        self.mode = 'submit_solved'
-                        self.buttons_all()
-                except RuntimeError:
-                    self.message('The puzzle you have submitted is unsolvable!')
-                    self.mode = 'submit_unsolved'
-
-    def update_pc_solve_confirmation(self):
-        self.pc_solve_confirm = False
-
-    def computer_solve(self):
-        if self.pc_solve_confirm:
-            self.current_puzzle = sudoku_solver.solve(self.current_puzzle)
-            self.populate_grid()
-            self.stopwatch_running = False
-            self.timer_id = self.c1.create_window(1750*self.scale, 190*self.scale, window=self.timer)
-            self.buttons()
-            self.pc_solve_confirm = False
+    def toggle_mode(self):
+        self.is_markdown_mode =  not self.is_markdown_mode
+        if self.is_markdown_mode:
+            x = self.main_input.focus
+            self.main_input.disabled = True
+            self.main_input.opacity = 0.7
+            self.markdown_input.disabled = False
+            self.markdown_input.opacity = 1.0
+            if x:
+                self.markdown_input.unfocus_on_touch = False
+                self.markdown_input.focus = True
+                Clock.schedule_once(lambda dx: setattr(self.markdown_input, 'unfocus_on_touch', True), 2)
         else:
+            x = self.markdown_input.focus
+            self.main_input.disabled = False
+            self.main_input.opacity = 1.0
+            self.markdown_input.disabled = True
+            self.markdown_input.opacity = 0.7
+            if x:
+                self.main_input.unfocus_on_touch = False
+                self.markdown_input.focus = False
+                self.main_input.focus = True
+                Clock.schedule_once(lambda dx: setattr(self.main_input, 'unfocus_on_touch', True), 2)
+
+class SudokuGrid(GridLayout):
+    def __init__(self, puzzle:list, **kwargs):
+        super().__init__(**kwargs)
+        self.puzzle = puzzle
+        self.cells = {}
+        for i, num in enumerate(puzzle):
+            if num == 0:
+                widget = GridCell()
+                self.cells.update({i:widget})
+            else:
+                widget = ResizingLabel(text=str(num), color = (1,0.2,0.2,1), size_hint_x = .5, size_hint_y = .5, valign = 'top', font_size = '69dp')
+            self.add_widget(widget)
+        self.bind(pos = self.update_lines, size = self.update_lines)
+        self.update_lines()
+
+
+    def toggle_markdown(self):
+        for i in self.cells:
+            self.cells[i].toggle_mode()
+    
+    def read_filled_puzzle(self):
+        filled_puzzle = copy(self.puzzle)
+        for i in self.cells:
+            x = self.cells[i].main_input.text
+            if x == '':
+                filled_puzzle[i] = 0
+            else:
+                filled_puzzle[i] = int(x)
+        return filled_puzzle
+            
+    
+    def update_lines(self, *args):
+        screen_width, screen_height = Window.size
+        self.size_hint = (.75*(screen_height/screen_width),.75)
+        self.canvas.after.clear()
+        with self.canvas.after:
+            Color(0, 0, 0, 1)
+            x, y = self.pos
+            w, h = self.size
+            rows, cols = self.rows, self.cols
+            dx = w / cols
+            dy = h / rows
+
+            for i in range(cols+1):
+                match i:
+                    case 0 | 3 | 6 | 9:
+                        width = 2.25
+                    case _:
+                        width = 1.5
+                Line(points=[x + i * dx, y, x + i * dx, y + h], width=width)
+
+            for i in range(rows+1):
+                match i:
+                    case 0 | 3 | 6 | 9:
+                        width = 2.25
+                    case _:
+                        width = 1.5
+                Line(points=[x, y + i * dy, x + w, y + i * dy], width=width)
+
+class SudokuApp(App):
+    def __init__(self, csv_location, **kwargs):
+        self.csv_location = csv_location
+        super().__init__(**kwargs)
+        
+    def build(self):
+        self.pc_solve_confirm = False
+        self.clock_running = False
+        self.clock_scheduler = Clock.schedule_once(lambda dt: self.reset_pc_solve, 1)
+        self.clock_widget = Label(size_hint = (0.1,0.1), pos_hint = {'center_x':0.98, 'center_y':0.98}, color = (0,0,0,1), font_size = sp(16), halign = 'left')
+        self.csv_puzzles = PuzzleReader(self.csv_location)
+        self.puzzle = []
+        self.main_layout = FloatLayout(size_hint = (1,1), pos_hint = {'center_x':0.5, 'center_y':0.5})
+        self.build_empty(None)
+        return self.main_layout
+    
+    def display_clock_time(self):
+        self.clock_widget.text = f'{self.clock_time//60}:{self.clock_time%60}'
+    
+    def start_clock(self):
+        self.clock_scheduler.cancel()
+        self.clock_time = 0
+        self.clock_running = True
+        self.clock_widget.text = '0:00'
+        self.clock_scheduler = Clock.schedule_once(lambda dt: self.update_clock(), 1)
+
+    def update_clock(self):
+        if self.clock_running:
+            self.clock_time += 1
+            x = self.clock_time%60
+            if len(str(x)) == 1:
+                j = '0' + str(x)
+            else:
+                j = x
+            self.clock_widget.text = f'{self.clock_time//60}:{j}'
+            self.clock_scheduler = Clock.schedule_once(lambda dt: self.update_clock(), 1)
+    
+    def clear(self, instance):
+        self.main_layout.clear_widgets()
+
+    def top_buttons(self):
+        button_bar_1 = BoxLayout(orientation = 'horizontal', size_hint_y = 0.2, pos_hint = {'center_x':0.5, 'center_y':1}, padding = 0)
+        read_csv_button = Button(text = 'read random puzzle from file', size_hint = (0.1, 0.3), on_press = self.read_random)
+        input_puzzle_button = Button(text = 'input your own puzle', size_hint = (0.1, 0.3), on_press = self.build_empty)
+        generate_puzzle_button = Button(text = 'generate a random puzzle', size_hint = (0.1, 0.3), on_press = self.gen_random)
+        button_bar_1.add_widget(read_csv_button)
+        button_bar_1.add_widget(input_puzzle_button)
+        button_bar_1.add_widget(generate_puzzle_button)
+        return button_bar_1
+    
+    def bottom_buttons_submit_unsolved(self):
+        button_bar_2 = BoxLayout(orientation = 'horizontal', size_hint_y = 0.2, pos_hint = {'center_x':0.5, 'center_y':0.135})
+        submit_button = Button(text = 'Submit!', size_hint = (0.1, 0.3), on_press = self.submit_unsolved)
+        button_bar_2.add_widget(submit_button)
+        return button_bar_2
+    
+    def bottom_button_submit_solved(self):
+        self.clock_running = False
+        button_bar_2 = BoxLayout(orientation = 'horizontal', size_hint_y = 0.2, pos_hint = {'center_x':0.5, 'center_y':0.135})
+        markdown_button = Button(text = 'toggle note-taking mode', size_hint = (0.1, 0.3), on_press = self.toggle_markdown)
+        submit_button = Button(text = 'Submit!', size_hint = (0.1, 0.3), on_press = self.submit_solved)
+        computer_solve_button = Button(text = 'solve with computer', size_hint = (0.1, 0.3), on_press = self.computer_solve)
+        button_bar_2.add_widget(markdown_button)
+        button_bar_2.add_widget(submit_button)
+        button_bar_2.add_widget(computer_solve_button)
+        return button_bar_2
+    
+    def toggle_markdown(self, instance):
+        self.grid.toggle_markdown()
+    
+    def submit_unsolved(self, instance):
+        puzz = self.grid.read_filled_puzzle()
+        if SudokuSolver.all_valid(puzz): 
+            if SudokuCreator.single_solution(puzz):
+                self.puzzle = puzz
+                self.build_to_solve()
+            else:
+                self.message('The puzzle has multiple solutions!')
+        else:
+            self.message('The puzzle isn\'t valid!')
+    
+    def submit_solved(self, instance):
+        puzz = self.grid.read_filled_puzzle()
+        if SudokuSolver.all_valid(puzz):
+            if 0 in puzz:
+                self.message('Please fill the entire grid!')
+            else:
+                self.puzzle = puzz
+                self.build_filled()
+                self.message('Correct!')
+        else:
+            self.message('Incorrect!')
+            
+    def computer_solve(self, instance):
+        if self.pc_solve_confirm:
+            self.puzzle = SudokuSolver.solve(self.puzzle)
+            self.build_filled()
+        else:
+            self.message('Press again to confirm.')
             self.pc_solve_confirm = True
-            self.message("Press again to confirm.")
-            self.c1.after(5000, self.update_pc_solve_confirmation)
-
-    def gen_from_input(self):
-        self.mode = 'submit_solved'
-        self.populate_grid()
-        self.buttons_all()
+            Clock.schedule_once(self.reset_pc_solve, 3)
     
-    def generate_puzzle(self):
-        self.mode = 'submit_solved'
-        self.current_puzzle = sudoku_creator.create_unsolved()
-        self.populate_grid()
-        self.buttons_all()
-        
-    def read_random_puzzle(self):
-        self.mode = 'submit_solved'
-        self.current_puzzle = sudoku_solver.read_puzzle('libraries/puzzles.csv', randint(2,1000))
-        self.populate_grid()
-        self.buttons_all()
-        
-    def input_puzzle(self):
-        self.mode = 'submit_unsolved'
-        self.current_puzzle = sudoku_creator.blank_puzzle()
-        self.populate_grid()
-        self.buttons()
-
+    def reset_pc_solve(self, instance):
+        self.pc_solve_confirm = False
     
+    def build_empty(self, instance):
+        self.puzzle = SudokuCreator.blank_puzzle()
+        self.main_layout.clear_widgets()
+        self.grid = SudokuGrid(puzzle=self.puzzle, pos_hint = {'center_x':0.5, 'center_y':0.5}, cols = 9, rows = 9)
+        self.main_layout.add_widget(self.grid)
+        self.main_layout.add_widget(self.top_buttons())
+        self.main_layout.add_widget(self.bottom_buttons_submit_unsolved())
+        
+    def build_filled(self):
+        self.clock_running = False
+        self.main_layout.clear_widgets()
+        self.grid = SudokuGrid(puzzle=self.puzzle, pos_hint = {'center_x':0.5, 'center_y':0.5}, cols = 9, rows = 9)
+        self.main_layout.add_widget(self.grid)
+        self.main_layout.add_widget(self.top_buttons())
+        self.main_layout.add_widget(self.clock_widget)
+    
+    def build_to_solve(self):
+        self.main_layout.clear_widgets()
+        self.grid = SudokuGrid(puzzle=self.puzzle, pos_hint = {'center_x':0.5, 'center_y':0.5}, cols = 9, rows = 9)
+        self.main_layout.add_widget(self.grid)
+        self.main_layout.add_widget(self.top_buttons())
+        self.main_layout.add_widget(self.bottom_button_submit_solved())
+        self.main_layout.add_widget(self.clock_widget)
+        self.start_clock()
+    
+    def message(self, text):
+        overlay = Message(text, pos_hint = {'x':0.32, 'y':0.5})
+        self.main_layout.add_widget(overlay)
+        Clock.schedule_once(lambda dt: self.main_layout.remove_widget(overlay), 2)
+        
+    def read_random(self, instance):
+        self.puzzle = self.csv_puzzles.get_puzzle(randint(2,1001))
+        self.build_to_solve()
+    
+    def gen_random(self, instance):
+        self.puzzle = SudokuCreator.create_unsolved()
+        self.build_to_solve()
+
