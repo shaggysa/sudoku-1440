@@ -9,6 +9,7 @@ It can solve puzzles you input and create its own puzzles for you to solve. Ther
 ## dependencies as of V2.0
 
 csv: Used to read the 'puzzles.csv' file
+
 kivy: Used for the GUI.
 
 ## Usage
