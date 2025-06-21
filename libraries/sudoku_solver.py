@@ -79,7 +79,7 @@ class SudokuSolver:
         """_Solves a sudoku puzzle using a recursive backtracker._
 
         Args:
-            puzz (Puzzle): _The puzzle you want to solver after initializing it as a Puzzle object._
+            puzz (Puzzle): _The puzzle you want to solve after initializing it as a Puzzle object._
             position (int, optional): _The current position the backtracker is working on. Used internally._ Defaults to 0.
 
         Returns:
