@@ -28,9 +28,18 @@ class SudokuSolver:
         Returns:
             bool: _Returns true if there are not any repeats, otherwise it will return false._
         """
+        seen = [False] * 10
+        for x in arr:
+            if x:
+                if seen[x]:
+                    return False
+                seen[x] = True
+        return True
 
-        arr = [x for x in arr if x]
-        return len(set(arr)) == len(arr)
+
+
+        #arr = [x for x in arr if x]
+        #return len(set(arr)) == len(arr)
 
     @staticmethod
     def pos_valid(puzzle:list, pos:int) -> bool:
