@@ -11,16 +11,15 @@ try:
     from kivy.graphics import Color, Line, Rectangle
     from kivy.clock import Clock
 except ImportError:
-    print("Kivy is a necessary dependancy. Please install it with pip to use the app.")
-    
-from libraries.puzzle_reader import PuzzleReader
-from libraries.sudoku_solver import SudokuSolver
-from libraries.sudoku_creator import SudokuCreator
+    print("Kivy is a necessary dependency. Please install it with pip to use the app.")
+
+try:
+    import lib_sudoku as sudoku
+except ImportError:
+    print("lib_sudoku is a necessary dependency. Please install it with pip to use the app.")
 from copy import copy
-from sys import setrecursionlimit
 from random import randint
 
-setrecursionlimit(1000000)
 Window.maximize()
 Window.clearcolor = (1,1,1,1)
 
@@ -183,16 +182,12 @@ class SudokuGrid(GridLayout):
                 Line(points=[x, y + i * dy, x + w, y + i * dy], width=width)
 
 class SudokuApp(App):
-    def __init__(self, csv_location, **kwargs):
-        self.csv_location = csv_location
-        super().__init__(**kwargs)
-        
     def build(self):
         self.pc_solve_confirm = False
         self.clock_running = False
         self.clock_scheduler = Clock.schedule_once(lambda dt: self.reset_pc_solve, 1)
         self.clock_widget = Label(size_hint = (0.1,0.1), pos_hint = {'center_x':0.98, 'center_y':0.98}, color = (0,0,0,1), font_size = sp(16), halign = 'left')
-        self.csv_puzzles = PuzzleReader(self.csv_location)
+        self.csv_puzzles = sudoku.PuzzleReader("https://raw.githubusercontent.com/shaggysa/lib_sudoku/master/puzzles.csv", True)
         self.puzzle = []
         self.main_layout = FloatLayout(size_hint = (1,1), pos_hint = {'center_x':0.5, 'center_y':0.5})
         self.build_empty(None)
@@ -254,18 +249,14 @@ class SudokuApp(App):
     
     def submit_unsolved(self, instance):
         puzz = self.grid.read_filled_puzzle()
-        if SudokuSolver.all_valid(puzz): 
-            if SudokuCreator.single_solution(puzz):
-                self.puzzle = puzz
-                self.build_to_solve()
-            else:
-                self.message('The puzzle has multiple solutions!')
+        if sudoku.is_valid(puzz):
+            self.build_to_solve()
         else:
             self.message('The puzzle isn\'t valid!')
     
     def submit_solved(self, instance):
         puzz = self.grid.read_filled_puzzle()
-        if SudokuSolver.all_valid(puzz):
+        if sudoku.is_valid(puzz):
             if 0 in puzz:
                 self.message('Please fill the entire grid!')
             else:
@@ -277,7 +268,7 @@ class SudokuApp(App):
             
     def computer_solve(self, instance):
         if self.pc_solve_confirm:
-            self.puzzle = SudokuSolver.solve(self.puzzle)
+            self.puzzle = sudoku.solve(self.puzzle)
             self.build_filled()
         else:
             self.message('Press again to confirm.')
@@ -288,7 +279,7 @@ class SudokuApp(App):
         self.pc_solve_confirm = False
     
     def build_empty(self, instance):
-        self.puzzle = SudokuCreator.blank_puzzle()
+        self.puzzle = [0] * 81
         self.main_layout.clear_widgets()
         self.grid = SudokuGrid(puzzle=self.puzzle, pos_hint = {'center_x':0.5, 'center_y':0.5}, cols = 9, rows = 9)
         self.main_layout.add_widget(self.grid)
@@ -318,10 +309,13 @@ class SudokuApp(App):
         Clock.schedule_once(lambda dt: self.main_layout.remove_widget(overlay), 2)
         
     def read_random(self, instance):
-        self.puzzle = self.csv_puzzles.get_puzzle(randint(2,1001))
+        print(list(self.csv_puzzles.get_unsolved_puzz(randint(2,1001))))
+        self.puzzle = list(self.csv_puzzles.get_unsolved_puzz(randint(2,1001)))
+        print(self.puzzle)
         self.build_to_solve()
     
     def gen_random(self, instance):
-        self.puzzle = SudokuCreator.create_unsolved()
+        self.puzzle = list(sudoku.gen_unsolved(randint(24,36)))
+        self.build_to_solve()
         self.build_to_solve()
 
