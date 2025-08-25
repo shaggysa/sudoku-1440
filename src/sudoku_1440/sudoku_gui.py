@@ -288,6 +288,7 @@ class SudokuApp(App):
         
     def build_filled(self):
         self.clock_running = False
+        self.pc_solve_confirm = False
         self.main_layout.clear_widgets()
         self.grid = SudokuGrid(puzzle=self.puzzle, pos_hint = {'center_x':0.5, 'center_y':0.5}, cols = 9, rows = 9)
         self.main_layout.add_widget(self.grid)
@@ -309,7 +310,6 @@ class SudokuApp(App):
         Clock.schedule_once(lambda dt: self.main_layout.remove_widget(overlay), 2)
         
     def read_random(self, instance):
-        print(list(self.csv_puzzles.get_unsolved_puzz(randint(2,1001))))
         self.puzzle = list(self.csv_puzzles.get_unsolved_puzz(randint(2,1001)))
         print(self.puzzle)
         self.build_to_solve()
