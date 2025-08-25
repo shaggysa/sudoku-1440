@@ -1,10 +1,12 @@
 # sudoku-1440
 
-This is an interactive sudoku creating/solving GUI created in python utilizing kivy.
+This is an interactive sudoku creating/solving GUI created in python with kivy.
 
 Resolution scaling has been implemented, and it should work on just about any (reasonable) screen resolution.
 
-It can solve puzzles you input and create its own puzzles for you to solve. There is also a 'speedtest' file to see how fast it can solve 1000 puzzles.
+It can solve puzzles you input and create its own puzzles for you to solve. 
+
+There is also a 'speedtest' application to see how fast the solver is.
 
 ## dependencies as of V3.0
 
@@ -12,14 +14,28 @@ lib_sudoku: My custom sudoku solver and generator.
 
 kivy: Used for the GUI.
 
-## Usage
+## usage
 
-Once you have installed the dependencies, simply run main.py with python and the gui will pop up. You can run speedtest.py to test the speed of the solver.
+To install with pipx in the terminal, run
 
-As of [release 2.0](https://github.com/shaggysa/sudoku-1440/releases/tag/V2.0), executables are released with the code. Linux, MacOS, and Windows are all supported in the x64 architecture.
-Simply download the correct executable and run it!
+```
+pipx install sudoku-1440
+```
 
-If your architecture is not supported, you can build the packages yourself by running pyinstaller with the included .spec files. 
+To open the gui, run
+```
+sudoku_1440
+``` 
 
-*note for linux users: The speedtest.py/executable must open a terminal for you to see the results. Some Desktop Environments such as KDE with not automatically open a termianl and you must run the file directly using the terminal.*
+To speedtest the solver, run
+```
+sudoku_speedtest
+```
 
+If you preferred, you can also speedtest your own puzzle file with
+
+```
+sudoku_speedtest <filename>
+```
+
+One recommended dataset to try would be https://www.kaggle.com/datasets/rohanrao/sudoku.
