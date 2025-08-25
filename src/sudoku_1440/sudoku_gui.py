@@ -70,7 +70,7 @@ class OneDigitInput(TextInput):
     def on_text_change(self, instance, value:int):
         if len(value) > 1:
             self.text = value[-1]
-    def update_border():
+    def update_border(self, instance):
         pass
 
 
@@ -311,7 +311,6 @@ class SudokuApp(App):
         
     def read_random(self, instance):
         self.puzzle = list(self.csv_puzzles.get_unsolved_puzz(randint(2,1001)))
-        print(self.puzzle)
         self.build_to_solve()
     
     def gen_random(self, instance):
