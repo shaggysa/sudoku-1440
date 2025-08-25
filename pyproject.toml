@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sudoku_1440"
-version = "3.1.0"
+version = "3.1.1"
 description = "A GUI application for sudoku puzzles"
 readme = "README.md"
 requires-python = ">=3.8"
