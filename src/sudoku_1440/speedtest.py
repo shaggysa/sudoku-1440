@@ -4,10 +4,18 @@ try:
 except ModuleNotFoundError:
     print("Please install lib_sudoku with pip")
     exit(1)
+
+from sys import argv
+
 def main():
-    reader = sudoku.PuzzleReader("https://raw.githubusercontent.com/shaggysa/lib_sudoku/master/puzzles.csv", True)
-    sudoku.synchronous_speedtest(reader)
+    if len(argv) < 2:
+        print("No arg for puzzle file provided, using default.")
+        reader = sudoku.PuzzleReader("https://raw.githubusercontent.com/shaggysa/lib_sudoku/master/puzzles.csv", True)
+    else:
+        reader = sudoku.PuzzleReader(argv[1], False)
     sudoku.async_speedtest(reader)
+    sudoku.synchronous_speedtest(reader)
+
     
 if __name__ == "__main__":
     main()
