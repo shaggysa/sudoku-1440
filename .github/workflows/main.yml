@@ -40,30 +40,10 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: sudoku_1440-*-py3-none-any.whl
-          path: dist/
+          path: dist
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
-          packages-dir: dist/
-
-  publish_source:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release' && github.event.action == 'published'
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: sudoku_1440-*.tar.gz
-          path: dist/
-
-      - run: pip install twine
-      - run: twine upload dist/sudoku_1440-*.tar.gz -u __token__ -p ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: dist
