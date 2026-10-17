@@ -18,18 +18,18 @@ kivy: Used for the GUI.
 
 To open the gui, run
 ```
-uvx --from sudoku_1440 sudoku_1440
+uvx --python 3.13 --from sudoku_1440 sudoku_1440
 ``` 
 
 To speedtest the solver, run
 ```
-uvx --from sudoku_1440 sudoku_speedtest
+uvx --python 3.13 --from sudoku_1440 sudoku_speedtest
 ```
 
 If you preferred, you can also speedtest your own puzzle file with
 
 ```
-uvx --from sudoku_1440 sudoku_speedtest <filename>
+uvx --python 3.13 --from sudoku_1440 sudoku_speedtest <filename>
 ```
 
 One recommended dataset to try would be https://www.kaggle.com/datasets/rohanrao/sudoku.
