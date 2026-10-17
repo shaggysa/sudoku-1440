@@ -250,6 +250,7 @@ class SudokuApp(App):
     def submit_unsolved(self, instance):
         puzz = self.grid.read_filled_puzzle()
         if sudoku.is_valid(puzz):
+            self.puzzle = puzz
             self.build_to_solve()
         else:
             self.message('The puzzle isn\'t valid!')
