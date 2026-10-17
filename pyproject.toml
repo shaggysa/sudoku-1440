@@ -7,7 +7,7 @@ name = "sudoku_1440"
 version = "3.1.4"
 description = "A GUI application for sudoku puzzles"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8, <3.14"
 license = {file = "LICENSE"}
 
 dependencies = [
